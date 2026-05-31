@@ -1,23 +1,17 @@
-import { pipeline, env } from '@xenova/transformers';
+import OpenAI from 'openai';
 
-// Skip local model caching issues and optional configs
-env.allowLocalModels = false;
-
-let embeddingPipeline: any = null;
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
-    if (!embeddingPipeline) {
-      // Use the standard, fast all-MiniLM-L6-v2 model which has 384 dimensions
-      embeddingPipeline = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-    }
-
-    const output = await embeddingPipeline(text.replace(/\n/g, ' ').trim(), {
-      pooling: 'mean',
-      normalize: true,
+    const response = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: text.replace(/\n/g, ' ').trim(),
     });
 
-    return Array.from(output.data);
+    return response.data[0].embedding;
   } catch (error) {
     console.error('Error generating embedding:', error);
     throw new Error(
