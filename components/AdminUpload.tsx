@@ -65,17 +65,26 @@ export default function AdminUpload({ password, onUploadSuccess }: AdminUploadPr
         body: formData,
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Upload failed on server.');
+        }
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Upload failed');
+        setStatus('success');
+        setMessage(`✅ ${data.chunksIndexed} menu chunks indexed successfully from "${data.fileName}"`);
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        onUploadSuccess();
+      } else {
+        const textError = await response.text();
+        console.error("Server returned non-JSON response:", textError.substring(0, 200));
+        throw new Error(
+          `Server error (${response.status}). The server encountered an issue and could not process the file.`
+        );
       }
-
-      setStatus('success');
-      setMessage(`✅ ${data.chunksIndexed} menu chunks indexed successfully from "${data.fileName}"`);
-      setFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      onUploadSuccess();
     } catch (error) {
       setStatus('error');
       setMessage(

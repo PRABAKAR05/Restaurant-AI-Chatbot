@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parsePDFToChunks } from '@/lib/pdf-parser';
 import { generateEmbedding } from '@/lib/embeddings';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase';
 
 export const maxDuration = 60;
 
@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
       try {
         const embedding = await generateEmbedding(chunk);
 
+        const supabaseAdmin = getSupabaseAdmin();
         const { error } = await supabaseAdmin.from('menu_items').insert({
           content: chunk,
           embedding: embedding,

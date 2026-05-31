@@ -1,4 +1,4 @@
-import { supabaseAdmin } from './supabase';
+import { getSupabaseAdmin } from './supabase';
 import { generateEmbedding } from './embeddings';
 
 export interface RetrievedChunk {
@@ -13,6 +13,8 @@ export async function retrieveRelevantChunks(
 ): Promise<RetrievedChunk[]> {
   try {
     const queryEmbedding = await generateEmbedding(query);
+
+    const supabaseAdmin = getSupabaseAdmin();
 
     const { data, error } = await supabaseAdmin.rpc('match_menu_items', {
       query_embedding: queryEmbedding,
