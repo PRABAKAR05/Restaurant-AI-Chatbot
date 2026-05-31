@@ -47,12 +47,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate embeddings and upsert into Supabase
+    // Generate embeddings and upsert into Supabase concurrently
     let indexedCount = 0;
 
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
-
+    const promises = chunks.map(async (chunk, i) => {
       try {
         const embedding = await generateEmbedding(chunk);
 
@@ -68,15 +66,18 @@ export async function POST(request: NextRequest) {
 
         if (error) {
           console.error(`Error inserting chunk ${i}:`, error);
-          continue;
+          return false;
         }
 
-        indexedCount++;
+        return true;
       } catch (embeddingError) {
         console.error(`Error processing chunk ${i}:`, embeddingError);
-        continue;
+        return false;
       }
-    }
+    });
+
+    const results = await Promise.all(promises);
+    indexedCount = results.filter((success) => success).length;
 
     return NextResponse.json({
       success: true,
