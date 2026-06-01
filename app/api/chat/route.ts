@@ -17,7 +17,7 @@ type RawMessage = {
   parts?: MessagePart[];
 };
 
-const extractText = (m: RawMessage): string => {
+const extractText = (m: RawMessage): string => {  
   if (typeof m.content === 'string') return m.content;
   if (Array.isArray(m.content))
     return m.content
