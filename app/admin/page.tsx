@@ -119,7 +119,7 @@ export default function AdminPage() {
             <span className="text-xs text-green-400 flex items-center gap-1">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               <span className="hidden sm:inline">Authenticated</span>
-              <span className="sm:hidden">Auth'd</span>
+              <span className="sm:hidden">Auth&apos;d</span>
             </span>
             <Link
               href="/"
