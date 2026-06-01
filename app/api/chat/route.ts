@@ -4,9 +4,9 @@ import { retrieveRelevantChunks } from '@/lib/retrieval';
 
 export const maxDuration = 30;
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+const groq = process.env.GROQ_API_KEY
+  ? createGroq({ apiKey: process.env.GROQ_API_KEY })
+  : undefined;
 
 type MessagePart = { type: string; text?: string };
 
@@ -87,11 +87,22 @@ ${menuContext}
       content: extractText(m),
     }));
 
+    const model =
+      groq?.('llama-3.1-8b-instant') ??
+      (process.env.OPENAI_API_KEY ? 'gpt-4o-mini' : undefined) ??
+      (process.env.ANTHROPIC_API_KEY ? 'claude-3.0' : undefined);
+
+    if (!model) {
+      throw new Error(
+        'No LLM provider configured. Set GROQ_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY.'
+      );
+    }
+
     const result = streamText({
-  model: groq('llama-3.1-8b-instant'),
-  system: systemPrompt,
-  messages: coreMessages,
-});
+      model,
+      system: systemPrompt,
+      messages: coreMessages,
+    });
 
 // Debug log
 result.text.then((text) => {
