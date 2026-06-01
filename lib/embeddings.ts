@@ -97,9 +97,11 @@ async function generateEmbeddingLocally(
   text: string
 ): Promise<number[]> {
   if (!localPipeline) {
-    // Completely hide from Vercel's bundler so it doesn't try to load libonnxruntime.so
+    // Completely hide from Vercel's bundler by splitting the string so AST analyzers fail to find it
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    const getTransformers = new Function("return import('@xenova/transformers')");
+    const getTransformers = new Function(
+      "return import('@" + "xen" + "ova/trans" + "formers')"
+    );
     const { pipeline, env } = await getTransformers();
 
     env.allowLocalModels = false;
