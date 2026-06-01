@@ -6,7 +6,13 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
   },
-  // pdf-parse and xenova need to run in Node.js server environment (not edge)
+  webpack: (config, { isServer }) => {
+    // Exclude Xenova from Vercel build to prevent 50MB limit errors
+    if (process.env.VERCEL === "1") {
+      config.resolve.alias['@xenova/transformers'] = false;
+    }
+    return config;
+  },
   serverExternalPackages: ['pdf-parse', '@xenova/transformers', 'onnxruntime-node'],
 };
 
