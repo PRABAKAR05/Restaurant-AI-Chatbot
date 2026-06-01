@@ -6,8 +6,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
   },
-  // Allow pdf-parse and transformers to work in server environment
-  serverExternalPackages: ['pdf-parse', 'onnxruntime-node', '@xenova/transformers'],
+  // pdf-parse and xenova need to run in Node.js server environment (not edge)
+  serverExternalPackages: ['pdf-parse', '@xenova/transformers', 'onnxruntime-node'],
 };
 
 export default nextConfig;

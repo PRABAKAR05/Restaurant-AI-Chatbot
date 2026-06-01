@@ -9,16 +9,32 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Client-side check for simplicity
-    if (password === 'restaurant_admin_2024') {
-      setIsAuthenticated(true);
-      setLoginError('');
-    } else {
-      setLoginError('Invalid password. Please try again.');
+    setIsVerifying(true);
+    setLoginError('');
+
+    try {
+      const res = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      if (res.status === 401) {
+        setLoginError('Invalid password. Please try again.');
+      } else if (res.ok) {
+        setIsAuthenticated(true);
+      } else {
+        setLoginError('Something went wrong. Please try again.');
+      }
+    } catch {
+      setLoginError('Unable to reach the server. Please try again.');
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -26,21 +42,16 @@ export default function AdminPage() {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  // Login Gate
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
         <div className="max-w-md w-full">
-          {/* Logo */}
           <div className="text-center mb-8">
             <div className="text-5xl mb-4">🔐</div>
             <h1 className="text-3xl font-bold text-white mb-2">Admin Panel</h1>
-            <p className="text-gray-400 text-sm">
-              Spice Garden Menu Management
-            </p>
+            <p className="text-gray-400 text-sm">Spice Garden Menu Management</p>
           </div>
 
-          {/* Login Form */}
           <form
             onSubmit={handleLogin}
             className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/10"
@@ -58,15 +69,12 @@ export default function AdminPage() {
               placeholder="Enter admin password"
               className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
               autoFocus
+              disabled={isVerifying}
             />
 
             {loginError && (
               <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                <svg
-                  className="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -79,9 +87,10 @@ export default function AdminPage() {
 
             <button
               type="submit"
-              className="mt-4 w-full py-3 px-4 rounded-xl font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98]"
+              disabled={isVerifying || !password}
+              className="mt-4 w-full py-3 px-4 rounded-xl font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isVerifying ? 'Verifying...' : 'Sign In'}
             </button>
 
             <div className="mt-4 text-center">
@@ -98,10 +107,8 @@ export default function AdminPage() {
     );
   }
 
-  // Admin Dashboard
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-amber-50 to-orange-50">
-      {/* Header */}
       <header className="bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 text-white px-4 py-4 shadow-xl">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
           <div className="text-center sm:text-left">
@@ -140,16 +147,11 @@ export default function AdminPage() {
         </div>
       </header>
 
-      {/* Dashboard Content */}
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        {/* Upload Section */}
         <AdminUpload password={password} onUploadSuccess={handleUploadSuccess} />
-
-        {/* Indexed Items Section */}
         <MenuItemsTable refreshTrigger={refreshTrigger} password={password} />
       </main>
 
-      {/* Footer */}
       <footer className="text-center py-4 text-xs text-gray-400">
         Spice Garden Restaurant • Admin Panel • Powered by AI
       </footer>
