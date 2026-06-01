@@ -31,6 +31,7 @@ async function generateEmbeddingViaAPI(text: string): Promise<number[]> {
 }
 
 // ─── Local path (Xenova – runs on device, no internet required) ───────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let localPipeline: any = null;
 
 async function generateEmbeddingLocally(text: string): Promise<number[]> {

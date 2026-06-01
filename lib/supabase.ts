@@ -7,6 +7,7 @@ export const supabase = createClient(
 );
 
 // Server-side Supabase client (uses service role key for admin operations)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let supabaseAdminInstance: any = null;
 
 export function getSupabaseAdmin() {

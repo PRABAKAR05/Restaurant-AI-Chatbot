@@ -1,6 +1,7 @@
 export async function parsePDFToChunks(buffer: Buffer): Promise<string[]> {
   try {
-    const pdf = require('pdf-parse');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdf = require('pdf-parse');
     const data = await pdf(buffer);
     const rawText = data.text;
 
