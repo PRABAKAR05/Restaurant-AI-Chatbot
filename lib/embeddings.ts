@@ -35,7 +35,9 @@ let localPipeline: any = null;
 
 async function generateEmbeddingLocally(text: string): Promise<number[]> {
   if (!localPipeline) {
-    const { pipeline, env } = await import('@xenova/transformers');
+    // Hide from Next.js bundler so Vercel doesn't try to package this 100MB library
+    const moduleName = '@xenova/transformers';
+    const { pipeline, env } = await import(/* webpackIgnore: true */ moduleName);
     env.allowLocalModels = false; // always fetch from HF Hub on first run, cached after
     localPipeline = await pipeline(
       'feature-extraction',
