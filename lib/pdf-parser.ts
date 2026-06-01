@@ -1,7 +1,6 @@
-const pdf = require('pdf-parse');
-
 export async function parsePDFToChunks(buffer: Buffer): Promise<string[]> {
   try {
+    const pdf = require('pdf-parse');
     const data = await pdf(buffer);
     const rawText = data.text;
 
