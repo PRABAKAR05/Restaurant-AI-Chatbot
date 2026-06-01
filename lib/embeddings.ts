@@ -1,26 +1,25 @@
-import OpenAI from 'openai';
+import { HfInference } from '@huggingface/inference';
 
-let openai: OpenAI | null = null;
+let hf: HfInference | null = null;
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
-    if (!openai) {
-      if (!process.env.OPENAI_API_KEY) {
-        throw new Error('OPENAI_API_KEY environment variable is missing.');
+    if (!hf) {
+      if (!process.env.HUGGINGFACE_API_KEY) {
+        throw new Error('HUGGINGFACE_API_KEY environment variable is missing.');
       }
-      openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
+      hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
     }
 
-    const response = await openai.embeddings.create({
-      model: 'text-embedding-3-small',
-      input: text.replace(/\n/g, ' ').trim(),
+    const response = await hf.featureExtraction({
+      model: 'sentence-transformers/all-MiniLM-L6-v2',
+      inputs: text.replace(/\n/g, ' ').trim(),
     });
 
-    return response.data[0].embedding;
+    // The output is typically a 1D array of numbers for this model
+    return Array.from(response as number[]);
   } catch (error) {
-    console.error('Error generating embedding:', error);
+    console.error('Error generating embedding with Hugging Face:', error);
     throw new Error(
       `Failed to generate embedding: ${error instanceof Error ? error.message : 'Unknown error'}`
     );

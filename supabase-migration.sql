@@ -12,7 +12,7 @@ create extension if not exists vector;
 create table if not exists menu_items (
   id uuid primary key default gen_random_uuid(),
   content text not null,
-  embedding vector(1536),
+  embedding vector(384),
   metadata jsonb default '{}',
   created_at timestamp with time zone default now()
 );
@@ -28,7 +28,7 @@ with (lists = 100);
 
 -- Step 4: Create RPC function for similarity search
 create or replace function match_menu_items(
-  query_embedding vector(1536),
+  query_embedding vector(384),
   match_threshold float,
   match_count int
 )
